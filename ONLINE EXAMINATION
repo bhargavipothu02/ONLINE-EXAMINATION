@@ -1,0 +1,142 @@
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
+
+class User {
+    private String userId;
+    private String password;
+    private String profile;
+
+    public User(String userId, String password) {
+        this.userId = userId;
+        this.password = password;
+        this.profile = "Profile details";
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+}
+
+public class OnlineExaminationSystem {
+    private static HashMap<String, User> users = new HashMap<>();
+    private static User currentUser;
+    private static Scanner scanner = new Scanner(System.in);
+    private static Timer timer;
+    private static boolean examSubmitted = false;
+
+    public static void main(String[] args) {
+        users.put("user1", new User("user1", "pass1"));
+        users.put("user2", new User("user2", "pass2"));
+
+        if (login()) {
+            while (true) {
+                System.out.println("\n1. Update Profile and Password");
+                System.out.println("2. Start Exam");
+                System.out.println("3. Logout");
+                System.out.print("Enter your choice: ");
+                int choice = Integer.parseInt(scanner.nextLine());
+
+                switch (choice) {
+                    case 1:
+                        updateProfile();
+                        break;
+                    case 2:
+                        startExam();
+                        break;
+                    case 3:
+                        logout();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            }
+        }
+    }
+
+    private static boolean login() {
+        System.out.print("Enter User ID: ");
+        String userId = scanner.nextLine();
+        System.out.print("Enter Password: ");
+        String password = scanner.nextLine();
+
+        User user = users.get(userId);
+        if (user != null && user.getPassword().equals(password)) {
+            currentUser = user;
+            System.out.println("Login successful!");
+            return true;
+        } else {
+            System.out.println("Invalid User ID or Password.");
+            return false;
+        }
+    }
+
+    private static void updateProfile() {
+        System.out.println("Current Profile: " + currentUser.getProfile());
+        System.out.print("Enter new profile details: ");
+        String newProfile = scanner.nextLine();
+        currentUser.setProfile(newProfile);
+
+        System.out.print("Enter new password: ");
+        String newPassword = scanner.nextLine();
+        currentUser.setPassword(newPassword);
+
+        System.out.println("Profile and password updated successfully!");
+    }
+
+    private static void startExam() {
+        System.out.println("Starting exam...");
+
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!examSubmitted) {
+                    submitExam();
+                }
+            }
+        }, 5 * 60 * 1000); // 5 minutes timer
+
+        // Example MCQs
+        String[] questions = {
+            "1. What is the capital of France?\n1. Paris\n2. London\n3. Berlin\n4. Madrid\n",
+            "2. What is the sum of 2 and 3?\n1. 4\n2. 5\n3. 6\n4. 7\n"
+        };
+
+        for (String question : questions) {
+            System.out.println(question);
+            System.out.print("Enter your answer: ");
+            int answer = Integer.parseInt(scanner.nextLine());
+        }
+
+        submitExam();
+    }
+
+    private static void submitExam() {
+        examSubmitted = true;
+        timer.cancel();
+        System.out.println("Exam submitted successfully!");
+    }
+
+    private static void logout() {
+        System.out.println("Logging out...");
+        currentUser = null;
+    }
+}
